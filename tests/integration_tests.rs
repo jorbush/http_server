@@ -10,7 +10,8 @@ const SERVER_ADDR: &str = "http://localhost:4221";
 
 fn start_server(directory: String) {
     std::thread::spawn(move || {
-        Command::cargo_bin("your_server").unwrap()
+        Command::cargo_bin("your_server")
+            .unwrap()
             .arg("--directory")
             .arg(&directory)
             .unwrap();
@@ -45,7 +46,10 @@ fn test_respond_with_404_not_found() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/abcdefg", SERVER_ADDR)).send().unwrap();
+    let response = client
+        .get(&format!("{}/abcdefg", SERVER_ADDR))
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 404);
 
@@ -58,10 +62,16 @@ fn test_respond_with_body() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/echo/abc", SERVER_ADDR)).send().unwrap();
+    let response = client
+        .get(&format!("{}/echo/abc", SERVER_ADDR))
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 200);
-    assert_eq!(response.headers().get("Content-Type").unwrap(), "text/plain");
+    assert_eq!(
+        response.headers().get("Content-Type").unwrap(),
+        "text/plain"
+    );
     assert_eq!(response.headers().get("Content-Length").unwrap(), "3");
     assert_eq!(response.text().unwrap(), "abc");
 
@@ -74,12 +84,17 @@ fn test_read_header() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/user-agent", SERVER_ADDR))
+    let response = client
+        .get(&format!("{}/user-agent", SERVER_ADDR))
         .header("User-Agent", "foobar/1.2.3")
-        .send().unwrap();
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 200);
-    assert_eq!(response.headers().get("Content-Type").unwrap(), "text/plain");
+    assert_eq!(
+        response.headers().get("Content-Type").unwrap(),
+        "text/plain"
+    );
     assert_eq!(response.headers().get("Content-Length").unwrap(), "12");
     assert_eq!(response.text().unwrap(), "foobar/1.2.3");
 
@@ -91,14 +106,16 @@ fn test_concurrent_connections() {
     let dir = tempdir().unwrap();
     start_server(dir.path().to_str().unwrap().to_owned());
 
-    let handles: Vec<_> = (0..3).map(|_| {
-        std::thread::spawn(|| {
-            let client = Client::new();
-            let response = client.get(SERVER_ADDR).send().unwrap();
-            assert_eq!(response.status(), 200);
-            assert_eq!(response.text().unwrap(), "HTTP/1.1 200 OK\r\n\r\n");
+    let handles: Vec<_> = (0..3)
+        .map(|_| {
+            std::thread::spawn(|| {
+                let client = Client::new();
+                let response = client.get(SERVER_ADDR).send().unwrap();
+                assert_eq!(response.status(), 200);
+                assert_eq!(response.text().unwrap(), "HTTP/1.1 200 OK\r\n\r\n");
+            })
         })
-    }).collect();
+        .collect();
 
     for handle in handles {
         handle.join().unwrap();
@@ -117,10 +134,16 @@ fn test_return_file_found() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/files/foo", SERVER_ADDR)).send().unwrap();
+    let response = client
+        .get(&format!("{}/files/foo", SERVER_ADDR))
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 200);
-    assert_eq!(response.headers().get("Content-Type").unwrap(), "application/octet-stream");
+    assert_eq!(
+        response.headers().get("Content-Type").unwrap(),
+        "application/octet-stream"
+    );
     assert_eq!(response.headers().get("Content-Length").unwrap(), "14");
     assert_eq!(response.text().unwrap(), "Hello, World!");
 
@@ -133,7 +156,10 @@ fn test_return_file_not_found() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/files/non_existant_file", SERVER_ADDR)).send().unwrap();
+    let response = client
+        .get(&format!("{}/files/non_existant_file", SERVER_ADDR))
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 404);
 
@@ -150,10 +176,12 @@ fn test_read_request_body() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.post(&format!("{}/files/file_123", SERVER_ADDR))
+    let response = client
+        .post(&format!("{}/files/file_123", SERVER_ADDR))
         .body("12345")
         .header("Content-Type", "application/octet-stream")
-        .send().unwrap();
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 201);
 
@@ -166,9 +194,11 @@ fn test_compression_headers_valid() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/echo/abc", SERVER_ADDR))
+    let response = client
+        .get(&format!("{}/echo/abc", SERVER_ADDR))
         .header("Accept-Encoding", "gzip")
-        .send().unwrap();
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 200);
     assert_eq!(response.headers().get("Content-Encoding").unwrap(), "gzip");
@@ -182,9 +212,11 @@ fn test_compression_headers_invalid() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/echo/abc", SERVER_ADDR))
+    let response = client
+        .get(&format!("{}/echo/abc", SERVER_ADDR))
         .header("Accept-Encoding", "invalid-encoding")
-        .send().unwrap();
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 200);
     assert!(response.headers().get("Content-Encoding").is_none());
@@ -198,9 +230,14 @@ fn test_multiple_compression_schemes_one_valid() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/echo/abc", SERVER_ADDR))
-        .header("Accept-Encoding", "invalid-encoding-1, gzip, invalid-encoding-2")
-        .send().unwrap();
+    let response = client
+        .get(&format!("{}/echo/abc", SERVER_ADDR))
+        .header(
+            "Accept-Encoding",
+            "invalid-encoding-1, gzip, invalid-encoding-2",
+        )
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 200);
     assert_eq!(response.headers().get("Content-Encoding").unwrap(), "gzip");
@@ -214,9 +251,11 @@ fn test_multiple_compression_schemes_all_invalid() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/echo/abc", SERVER_ADDR))
+    let response = client
+        .get(&format!("{}/echo/abc", SERVER_ADDR))
         .header("Accept-Encoding", "invalid-encoding-1, invalid-encoding-2")
-        .send().unwrap();
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 200);
     assert!(response.headers().get("Content-Encoding").is_none());
@@ -230,9 +269,11 @@ fn test_gzip_compression() {
     start_server(dir.path().to_str().unwrap().to_owned());
 
     let client = Client::new();
-    let response = client.get(&format!("{}/echo/abc", SERVER_ADDR))
+    let response = client
+        .get(&format!("{}/echo/abc", SERVER_ADDR))
         .header("Accept-Encoding", "gzip")
-        .send().unwrap();
+        .send()
+        .unwrap();
 
     assert_eq!(response.status(), 200);
     assert_eq!(response.headers().get("Content-Encoding").unwrap(), "gzip");
