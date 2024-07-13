@@ -50,7 +50,7 @@ fn handle_response(request: &str) -> Vec<u8> {
 
     let request_accept_encoding = request
         .lines()
-        .find(|line| line.starts_with("Accept-Encoding:"))
+        .find(|line| line.starts_with("Accept-Encoding:") || line.starts_with("accept-encoding:"))
         .and_then(|line| line.split(':').nth(1))
         .map(|encodings| encodings.split(',').map(str::trim).collect::<Vec<&str>>())
         .unwrap_or_default()
@@ -64,7 +64,7 @@ fn handle_response(request: &str) -> Vec<u8> {
         "/user-agent" => {
             let user_agent = request
                 .lines()
-                .find(|line| line.starts_with("User-Agent"))
+                .find(|line| line.starts_with("User-Agent") || line.starts_with("user-agent"))
                 .unwrap()
                 .split_whitespace()
                 .collect::<Vec<&str>>()[1..]
@@ -107,7 +107,9 @@ fn handle_response(request: &str) -> Vec<u8> {
                     let request_body = request.split("\r\n\r\n").collect::<Vec<&str>>()[1];
                     let content_length = request
                         .lines()
-                        .find(|line| line.starts_with("Content-Length"))
+                        .find(|line| {
+                            line.starts_with("Content-Length") || line.starts_with("content-length")
+                        })
                         .unwrap()
                         .split_whitespace()
                         .collect::<Vec<&str>>()[1]
