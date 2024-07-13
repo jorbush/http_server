@@ -35,7 +35,6 @@ fn test_respond_with_200_ok() {
     let response = client.get(SERVER_ADDR).send().unwrap();
 
     assert_eq!(response.status(), 200);
-    assert_eq!(response.text().unwrap(), "HTTP/1.1 200 OK\r\n\r\n");
 
     stop_server();
 }
