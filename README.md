@@ -22,6 +22,7 @@ curl -v http://localhost:4221
 
 ## Testing
 
+With the server running, you can run the tests with the following command:
 ```bash
 cargo test
 ```
