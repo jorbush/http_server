@@ -45,7 +45,9 @@ fn handle_response(request: &str) -> Vec<u8> {
         .next()
         .unwrap()
         .split_whitespace()
-        .collect::<Vec<&str>>()[1];
+        .nth(1)
+        .unwrap_or("/");
+
     println!("request path: {}", request_path);
 
     let request_accept_encoding = request
