@@ -142,7 +142,7 @@ fn test_return_file_found() {
         response.headers().get("Content-Type").unwrap(),
         "application/octet-stream"
     );
-    assert_eq!(response.headers().get("Content-Length").unwrap(), "14");
+    assert_eq!(response.headers().get("Content-Length").unwrap(), "13");
     assert_eq!(response.text().unwrap(), "Hello, World!");
 
     stop_server();

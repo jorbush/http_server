@@ -98,7 +98,7 @@ curl -i http://localhost:4221/files/foo
 ```
 
 ```
-HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 14\r\n\r\nHello, World!
+HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 13\r\n\r\nHello, World!
 ```
 
 #### File not found
