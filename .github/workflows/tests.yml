@@ -15,4 +15,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: cargo test
+        with:
+          rust-version: stable
+
+      - name: Build server
+        run: cargo build
+
+      - name: Start HTTP server
+        run: |
+          cargo run -- --directory /tmp &
+          sleep 5
+
+      - name: Run tests
+        run: cargo test
+
+      - name: Stop HTTP server
+        run: |
+          pkill -f 'cargo run'
