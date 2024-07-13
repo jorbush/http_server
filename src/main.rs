@@ -147,7 +147,8 @@ fn generate_text_response(response_body: &str, request_accept_encoding: &str) ->
             "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
             response_body.len(),
             response_body
-        ).into_bytes(),
+        )
+        .into_bytes(),
     }
 }
 
